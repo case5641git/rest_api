@@ -1,0 +1,157 @@
+openapi: "3.0.1"
+
+info:
+  title: "Shop Review API"
+  description: |
+    # Features
+    - Get reviews
+    - Post reviews
+  termsOfService: "http://tastylog.com/terms/"
+  contact:
+    name: "Customer Support"
+    url: "http://tastylog.com/support/"
+    email: "support-desk@tastylog.com"
+  license:
+    name: "MIT License"
+    url: "https://opensource.org/licenses/MIT"
+  version: "1.0.0"
+
+tags:
+  - name: reviews
+    description: "Shop review operation"
+
+paths:
+  "/shops/{shopId}/reviews":
+    parameters:
+      - $ref: "#/components/parameters/ShopId"
+    get:
+      summary: "Get specified shop reviews"
+      description: "Get specified shop reviews by shopId"
+      tags: ["reviews"]
+      deprecated: false
+      responses:
+        "200":
+          description: "Success operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/SampleObject"
+    post:
+      summary: "Create reviews"
+      tags: ["reviews"]
+      parameters:
+        - name: x-api-key
+          in: header
+          description: "Request user's identifier"
+          schema:
+            type: string
+          example: "XXXX-XXXX-XXXX-XXXX"
+        - name: token
+          in: cookie
+          description: "One time token"
+          schema:
+            type: string
+          example: "XXXX-XXXX-XXXX-XXXX"
+      responses:
+        "201":
+          description: "Success operation"
+          headers:
+            location:
+              description: "new url of created review"
+              schema:
+                type: string
+                format: uri
+        "400":
+          $ref: "#/components/responses/400-BadRequest"
+      requestBody:
+        description: "Contents of reviews"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SampleObject"
+
+servers:
+  - url: "http://localhost:{port}"
+    description: "Local development"
+    variables:
+      port:
+        enum: ["3000", "8000"]
+        default: "3000"
+  - url: "https://it1.tastylog.com"
+    description: "Integration Testing 1"
+  - url: "https://stg2.tastylog.com"
+    description: "Staging"
+  - url: "https://api.tastylog.com"
+    description: "Production"
+
+components:
+  responses:
+    400-BadRequest:
+      description: "Client side error"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ClientErroe"
+  parameters:
+    ShopId:
+      name: "shopId"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+  schemas:
+    ClientErroe:
+      type: object
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+    SampleInt:
+      type: integer
+      minimum: 0
+      exclusiveMinimum: false
+      maximum: 100
+      exclusiveMaximum: true
+    SampleString:
+      type: string
+      nullable: true
+      minLength: 10
+      maxLength: 20
+    SampleBoolean:
+      type: boolean
+      default: false
+    SampleObject:
+      type: object
+      properties:
+        shop:
+          type: object
+          properties:
+            name:
+              type: string
+            place:
+              type: string
+        reviews:
+          type: array
+          items:
+            type: object
+            properties:
+              score:
+                type: integer
+                enum: [1, 2, 3, 4, 5]
+              comment:
+                type: string
